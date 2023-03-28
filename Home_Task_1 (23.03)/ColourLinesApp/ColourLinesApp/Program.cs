@@ -1,7 +1,7 @@
 ﻿// See https://aka.ms/new-console-template for more information
 using ColourLinesApp.Helpers;
 using System.Runtime.CompilerServices;
-
+//Вітаю. Перше завдання по створенню репозиторію Ви виконали.
 var testMatrix = new int[,]
 {
     {1,2,2,15,13 },
