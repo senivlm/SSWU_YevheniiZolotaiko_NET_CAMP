@@ -9,13 +9,13 @@ namespace task2_exercise1;
 
 public class WaterTower
 {
+    public string Name { get; } 
     public int MaxVolume { get; }
-    public int PumpPerTime { get; }
+    public int CollectingPumpSpeed { get; }
+    public int MaxPumpingSpeed { get; }
 
     private Mutex _mutex;
     private bool _isPumpRunning;
-
-    public string Name { get; }
 
     private int _waterReserve;
     public int WaterReserve
@@ -23,16 +23,21 @@ public class WaterTower
         get => _waterReserve;
         private set 
         {
-            if(value > MaxVolume)
+            if(value >= MaxVolume)
             {
                 _waterReserve = MaxVolume;
+                _isPumpRunning = false;
             }
             else if(value <=0)
             {
                 _waterReserve = 0;
-                if(!_isPumpRunning) Task.Run(() => PumpWater()); 
+                if (!_isPumpRunning) 
+                {
+                    _isPumpRunning = true;
+                    StartPumpingWater(); 
+                } 
             }
-            _waterReserve = value; 
+            else _waterReserve = value; 
         }
     }
 
@@ -40,15 +45,19 @@ public class WaterTower
     {
         Name = name;
         WaterReserve= volume;
-        _mutex= new Mutex();
+
         MaxVolume = 100;
-        PumpPerTime = 10;
+        CollectingPumpSpeed = 10;
+        MaxPumpingSpeed= 15;
+
+        _mutex= new Mutex();
     }
 
-    public WaterTower(string name, int volume, int maxVolume, int pumpPerTime) : this(name,volume)
+    public WaterTower(string name, int volume, int maxVolume, int pumpPerTime, int maxPumpingSpeed) : this(name,volume)
     {
-        MaxVolume= maxVolume;
-        PumpPerTime= pumpPerTime;
+        MaxVolume = maxVolume;
+        CollectingPumpSpeed = pumpPerTime;
+        MaxPumpingSpeed = maxPumpingSpeed;
     }
 
     public int RequestWater(int volume)
@@ -56,36 +65,44 @@ public class WaterTower
         if (volume <= 0) return 0;
         int actualVolume;
         _mutex.WaitOne();
-        if(WaterReserve <= volume)
+        if(volume <= MaxPumpingSpeed && volume < WaterReserve) 
+        {
+            actualVolume = volume;
+        }
+        else if(volume <= MaxPumpingSpeed && volume >= WaterReserve)
         {
             actualVolume = WaterReserve;
-            WaterReserve = 0;
+        }
+        else if (volume > MaxPumpingSpeed && volume < WaterReserve)
+        {
+            actualVolume = MaxPumpingSpeed;
         }
         else
         {
-            actualVolume = volume;
-            WaterReserve -= volume;
+            actualVolume = Math.Min(MaxPumpingSpeed, WaterReserve);
         }
+        WaterReserve = WaterReserve - actualVolume;
         _mutex.ReleaseMutex();
         return actualVolume;
     }
 
-    private async Task PumpWater()
+    private void StartPumpingWater()
     {
-        if (_isPumpRunning) return;
-        _isPumpRunning= true;
-        while (WaterReserve < MaxVolume)
+        Task.Run(() =>
         {
-            _mutex.WaitOne();
-            WaterReserve = WaterReserve + PumpPerTime;
-            _mutex.ReleaseMutex();
-            await Task.Delay(1000);
-        }
-        _isPumpRunning = false;
+            while (_isPumpRunning)
+            {
+                _mutex.WaitOne();
+                WaterReserve = WaterReserve + CollectingPumpSpeed;
+                _mutex.ReleaseMutex();
+                Task.Delay(1000).Wait();
+            }
+        });
     }
+
 
     public override string ToString()
     {
-        return $"Water tower name: {Name}, current volume: {WaterReserve}, ";
+        return $"Water tower name: {Name}, current volume: {WaterReserve}";
     }
 }
