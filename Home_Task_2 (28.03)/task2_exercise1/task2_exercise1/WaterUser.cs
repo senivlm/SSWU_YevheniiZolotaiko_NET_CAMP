@@ -11,19 +11,17 @@ public class WaterUser
     public string Name { get; }
     public int WaterReserve { get; private set; }
     public int Consumption { get; set; }
-    public WaterTower WaterTower { get; set; }
 
-    public WaterUser(string name, WaterTower waterTower, int consumption = 15)
+    public WaterUser(string name, int consumption = 15)
     {
         Name = name;
         WaterReserve = 0;
-        WaterTower = waterTower;
         Consumption = consumption;
     }
 
-    public void GetWaterFromTower()
+    public void GetWaterFromTower(WaterTower waterTower)
     {
-        WaterReserve += WaterTower.RequestWater(Consumption);
+        WaterReserve += waterTower.RequestWater(Consumption);
     }
 
     public override string ToString()
