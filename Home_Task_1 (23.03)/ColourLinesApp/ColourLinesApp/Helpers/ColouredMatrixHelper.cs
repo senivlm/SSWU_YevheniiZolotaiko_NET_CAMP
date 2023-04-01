@@ -20,7 +20,7 @@ public static class ColouredMatrixHelper
         {
             currentLineInfo = new(colouredMatrix[i,0], new Point(i,0), new Point(i, 0), 1);
             for(int j = 1; j < colouredMatrix.GetLength(1); j++)
-            {
+            { У Вас на кожній точці відбувається уточнення можливого кінця лінії. Це лишнє. Достатньо на зміні кольору.
                 if (colouredMatrix[i, j] == currentLineInfo.Colour) 
                 { 
                     currentLineInfo.Length++;
