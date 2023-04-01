@@ -42,7 +42,7 @@ public class SpiralMatrixGenerator
     private void ChangeDirection()
     {
         if(_isClockwise) 
-        {
+        {// просто присвоєння без умов було б краще.
             if (_currentDirection == Direction.Down) _currentDirection = Direction.Left;
             else if (_currentDirection == Direction.Left) _currentDirection = Direction.Up;
             else if (_currentDirection == Direction.Up) _currentDirection = Direction.Right;
@@ -56,9 +56,9 @@ public class SpiralMatrixGenerator
             else if (_currentDirection == Direction.Left) _currentDirection = Direction.Down;
         }
     }
-
+// Тут рекурсія затратна.
     private void Move(int[,] matrix,ref int i, ref int j)
-    {
+    {// На всіх вітках однакове виконання!!!!!
         if(_currentDirection == Direction.Down)
         {
             if(i == matrix.GetLength(0) - 1 || matrix[i+1,j] != 0)
